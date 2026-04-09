@@ -1,0 +1,8 @@
+{
+    "inpaths":{
+        "drops":"output/Drops.json",
+        "items":"output/Items.json",
+        "npcs":"output/NPCs.json",
+        "recipes":"output/Recipes.json"
+    }
+}

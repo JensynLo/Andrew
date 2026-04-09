@@ -1,0 +1,64 @@
+{
+  "configs": {
+    "api_url": "https://terraria.wiki.gg/api.php",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    },
+    "limit": 8000,
+    "offset": 0,
+    "per_fetch":200
+    
+  },
+
+  "datas": {
+    "drops": {
+      "table": "Drops",
+      "fields": [
+        "name",
+        "item",
+        "rate",
+        "isfromnpc",
+        "normal",
+        "expert",
+        "master"
+      ]
+    },
+    "npcs": {
+      "table": "NPCs",
+      "fields": [
+        "name",
+        "nameraw",
+        "type",
+        "environment",
+        "ai",
+        "banner",
+        "bannername",
+        "npcid"
+      ]
+    },
+    "recipes": {
+      "table": "Recipes",
+      "fields": [
+        "result",
+        "station",
+        "ingredients"
+      ]
+    },
+    "items": {
+      "table": "Items",
+      "fields": [
+        "itemid",
+        "name",
+        "hardmode",
+        "type",
+        "rare",
+        "buy",
+        "sell",
+        "axe",
+        "pick",
+        "hammer",
+        "tooltip"
+      ]
+    }
+  }
+}
