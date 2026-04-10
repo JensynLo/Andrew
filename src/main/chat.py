@@ -3,7 +3,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
 MODEL_ID = "meta-llama/Llama-3.2-3B-Instruct"
-LORA_PATH = "output/terraria_lora_models/Andrew_V1"
+LORA_PATH = "output/terraria_lora_models/Andrew_V1_final"
 
 # 1. 加载基础模型和 Tokenizer
 print("loading model...")
