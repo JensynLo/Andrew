@@ -35,10 +35,10 @@ cd Andrew
 pip install -r requirements.txt
 
 # 3. 爬取数据
-python -m src.spider.runner --cfg configs/spider_config.json
+python -m src.spider.runner --cfg configs/spider_configs.json --output_path output/
 
 # 4. 生成微调数据
-python -m src.data.runner --cfg configs/data_config.json
+python -m src.data.runner --cfg configs/data_configs.json
 
 # 5. 微调模型
 python -m src.main.train

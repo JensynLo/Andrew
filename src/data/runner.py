@@ -63,7 +63,7 @@ def main():
         description="Build a Terraria knowledge graph from JSON data and generate datasets."
     )
     parser.add_argument(
-        "--config",
+        "--cfg",
         type=str,
         default="configs/data_configs.json",
         help="Path to the configuration JSON file containing input paths.",
