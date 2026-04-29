@@ -82,7 +82,7 @@ def run_finetuning(phase_name, train_dataset, model_id, tokenizer):
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map={"": 0},
-        torch_dtype=torch.bfloat16,
+        dtype=torch.bfloat16,
     )
     model.gradient_checkpointing_enable()
 
@@ -109,7 +109,6 @@ def run_finetuning(phase_name, train_dataset, model_id, tokenizer):
         output_dir=os.path.join(OUTPUT_DIR_BASE, phase_name),
         max_length=MAX_SEQ_LENGTH,
         dataset_text_field="text",
-        packing=True,
         per_device_train_batch_size=1,
         gradient_accumulation_steps=16,
         gradient_checkpointing=True,

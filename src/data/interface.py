@@ -24,7 +24,7 @@ class DataProcessorInterface(ABC):
         pass
 
     @abstractmethod
-    def export_dataset(self, graph: nx.DiGraph, output_path: str, samples: int = 5000):
+    def export_dataset(self, graph: nx.DiGraph, output_path: str, samples: int = 50000):
         """Export dataset from graph
 
         Args:
@@ -52,7 +52,7 @@ class TerrariaDataProcessor(DataProcessorInterface):
         """
         return self.graph_builder.build_graph(data_dict)
 
-    def export_dataset(self, graph: nx.DiGraph, output_path: str, samples: int = 5000):
+    def export_dataset(self, graph: nx.DiGraph, output_path: str, samples: int = 50000):
         """Export datasets from the knowledge graph
 
         Args:

@@ -1,11 +1,8 @@
-import os
 import re
 import time
 import json
-import pickle
 import requests
-import dirtyjson
-from pathlib import Path
+import logging
 from typing import Any, List, Dict, Optional
 
 
@@ -19,13 +16,16 @@ class spider:
         limit: int = 0,
         per_fetch: int = 500,
         offset: int = 0,
-        cache_file: Optional[str] = None,
     ):
         self.api_url = api_url
-        self.headers = headers
         self.target_tables = target_tables
         self.target_fields = target_fields
         self.limit = limit
+        self.offset = offset
+
+        # 使用 Session 复用 TCP 连接
+        self.session = requests.Session()
+        self.session.headers.update(headers)
 
         self.per_fetch = (
             200
@@ -35,137 +35,18 @@ class spider:
             )
             else min(per_fetch, 500)
         )
-        self.offset = offset
-        self.cache_file = cache_file
-
-        if self.cache_file and self._load_cache():
-            print(
-                f"[{self.target_tables}] Restoring progress from cache file {self.cache_file}..."
-            )
-
-    def _get_cache_filename(self) -> str:
-        """Get cache file name
-
-        Returns:
-            Cache filename based on target tables and fields
-        """
-        if self.cache_file:
-            return self.cache_file
-        fields_part = "_".join(self.target_fields[:3])
-        return f"./cache/{self.target_tables}_{fields_part}_cache.pkl"
-
-    def _ensure_cache_dir(self):
-        """Ensure cache directory exists"""
-        cache_path = Path(self._get_cache_filename())
-        cache_path.parent.mkdir(parents=True, exist_ok=True)
-
-    def _save_cache(self, data: List[Dict], current_offset: int):
-        """Save cache data to file
-
-        Args:
-            data: Current data list
-            current_offset: Current offset position
-        """
-        if not self.cache_file and not self._get_cache_filename():
-            return
-
-        self._ensure_cache_dir()
-        cache_data = {
-            "data": data,
-            "offset": current_offset,
-            "target_tables": self.target_tables,
-            "target_fields": self.target_fields,
-            "timestamp": time.time(),
-        }
-        cache_filename = self._get_cache_filename()
-        try:
-            with open(cache_filename, "wb") as f:
-                pickle.dump(cache_data, f)
-            print(f"[{self.target_tables}] Cache saved to {cache_filename}")
-        except Exception as e:
-            print(f"[{self.target_tables}] Failed to save cache: {e}")
-
-    def _load_cache(self) -> bool:
-        """Load cache data from file
-
-        Returns:
-            True if cache loaded successfully, False otherwise
-        """
-        cache_filename = self._get_cache_filename()
-        if not os.path.exists(cache_filename):
-            return False
-
-        try:
-            with open(cache_filename, "rb") as f:
-                cache_data = pickle.load(f)
-
-            if (
-                cache_data.get("target_tables") == self.target_tables
-                and cache_data.get("target_fields") == self.target_fields
-            ):
-                cached_data = cache_data.get("data", [])
-                cached_offset = cache_data.get("offset", 0)
-
-                if cached_data:
-                    print(
-                        f"[{self.target_tables}] Restored {len(cached_data)} records from cache"
-                    )
-                    self.cached_raw_data = cached_data
-                    self.offset = cached_offset
-                    return True
-                return False
-            else:
-                print(
-                    f"[{self.target_tables}] Cache file does not match current task, ignoring"
-                )
-                return False
-
-        except Exception as e:
-            print(f"[{self.target_tables}] Failed to load cache: {e}")
-            return False
-
-    def _clear_cache(self):
-        """Clear cache file"""
-        cache_filename = self._get_cache_filename()
-        if os.path.exists(cache_filename):
-            try:
-                os.remove(cache_filename)
-                print(f"[{self.target_tables}] Cache file deleted")
-            except Exception as e:
-                print(f"[{self.target_tables}] Failed to delete cache file: {e}")
-
-    def _extract_json(self, text: str) -> str:
-        """Extract JSON from text by finding matching brackets
-
-        Args:
-            text: Input text containing JSON
-
-        Returns:
-            Extracted JSON string or original text if no matching brackets found
-        """
-        start = text.find("{")
-        end = text.rfind("}")
-        if start != -1 and end != -1 and end > start:
-            return text[start : end + 1]
-        return text
 
     def fetch(self):
-        if hasattr(self, "cached_raw_data"):
-            raw = self.cached_raw_data.copy()
-            print(f"[{self.target_tables}] Using {len(raw)} cached records")
-        else:
-            raw = []
-
+        raw = []
         current_per_fetch = self.per_fetch
 
         while True:
             if self.limit > 0:
                 remaining = self.limit - len(raw)
                 if remaining <= 0:
-                    print(
-                        f"[{self.target_tables}] Reached the set limit: {self.limit} records, stopping fetch."
+                    logging.info(
+                        f"[{self.target_tables}] 已达到设定的总上限: {self.limit} 条，停止抓取。"
                     )
-                    self._clear_cache()
                     break
                 fetch_size = min(current_per_fetch, remaining)
             else:
@@ -184,13 +65,13 @@ class spider:
             retry_delay = 2
             request_success = False
             response = None
+            res = {}
 
             for attempt in range(max_retries):
                 try:
-                    response = requests.get(
+                    response = self.session.get(
                         self.api_url,
                         params=params_cargo,
-                        headers=self.headers,
                         timeout=30,
                     )
 
@@ -201,88 +82,83 @@ class spider:
                                 self.per_fetch, current_per_fetch + 50
                             )
                         break
+
+                    elif response.status_code == 429:
+                        wait_time = int(
+                            response.headers.get(
+                                "Retry-After", retry_delay * (attempt + 2)
+                            )
+                        )
+                        logging.warning(
+                            f"[{self.target_tables}] 触发限流(429)，等待 {wait_time} 秒..."
+                        )
+                        time.sleep(wait_time)
+
                     elif response.status_code in [500, 502, 503, 504]:
                         current_per_fetch = max(20, current_per_fetch // 2)
-                        print(
-                            f"[{self.target_tables}] Server pressure ({response.status_code}). Reducing speed to {current_per_fetch} records and retrying..."
+                        logging.warning(
+                            f"[{self.target_tables}] 服务器压力大({response.status_code})。降速至单次 {current_per_fetch} 条并重试..."
                         )
                         time.sleep(retry_delay * (attempt + 2))
                     else:
-                        print(
-                            f"[{self.target_tables}] Fatal error HTTP {response.status_code}, skipping current batch."
+                        logging.error(
+                            f"[{self.target_tables}] 致命错误 HTTP {response.status_code}，跳过当前批次。"
                         )
                         break
 
-                except Exception as e:
-                    print(
-                        f"[{self.target_tables}] Network exception: {e}, retrying ({attempt + 1}/{max_retries})..."
+                except requests.exceptions.RequestException as e:
+                    logging.error(
+                        f"[{self.target_tables}] 网络异常: {e}，重试中 ({attempt + 1}/{max_retries})..."
                     )
                     time.sleep(retry_delay * 2)
 
             if not request_success or response is None:
-                print(
-                    f"[{self.target_tables}] Failed {max_retries} times consecutively, forcing pagination, skipping Offset {self.offset}"
+                logging.error(
+                    f"[{self.target_tables}] 连续失败，强行翻页，跳过 Offset {self.offset}"
                 )
                 self.offset += fetch_size
-                self._save_cache(raw, self.offset)
                 continue
 
-            response_text = response.text
             try:
-                res = json.loads(response_text, strict=False)
+                res = response.json()
             except json.JSONDecodeError:
-                print(f"[{self.target_tables}] JSON corrupted, attempting repair...")
-                try:
-                    cleaned_text = self._extract_json(response_text)
-                    res = dirtyjson.loads(cleaned_text)
-                except Exception as e:
-                    print(
-                        f"[{self.target_tables}] Repair failed: {e}, forcing pagination."
-                    )
-                    self.offset += fetch_size
-                    self._save_cache(raw, self.offset)
-                    continue
+                # 放弃严重损坏的截断数据，防止脏数据污染下游 DAG
+                logging.error(
+                    f"[{self.target_tables}] JSON 损坏或截断，当前批次数据可能不完整，强行翻页。"
+                )
+                self.offset += fetch_size
+                continue
 
-            if isinstance(res, dict) and "error" in res:
+            if "error" in res:
                 info = res["error"].get("info", res["error"])
-                print(f"❌ Wiki API returned error: {info}")
-                self._save_cache(raw, self.offset)
+                logging.error(f"Wiki API 返回错误: {info}")
                 break
 
-            batch = res.get("cargoquery", []) if isinstance(res, dict) else []
-
+            batch = res.get("cargoquery", [])
             if not batch:
-                print(f"[{self.target_tables}] All data exhausted, no new records.")
-                self._clear_cache()
+                logging.info(f"[{self.target_tables}] 数据已全部触底，不再有新数据。")
                 break
 
-            raw.extend(batch)
+            # 提取当前批次的有效数据
+            processed_batch = [
+                item.get("title", {})
+                for item in batch
+                if isinstance(item, dict) and item.get("title")
+            ]
+            raw.extend(processed_batch)
+
             self.offset += len(batch)
 
-            self._save_cache(raw, self.offset)
-
             if self.limit > 0:
-                print(
-                    f"[{self.target_tables}] Progress: {len(raw)} / {self.limit} records..."
+                logging.info(
+                    f"[{self.target_tables}] 进度: {len(raw)} / {self.limit} 条..."
                 )
             else:
-                print(f"[{self.target_tables}] Currently fetched {len(raw)} records...")
+                logging.info(f"[{self.target_tables}] 当前已抓取 {len(raw)} 条记录...")
 
             time.sleep(0.5)
 
-        return self._process_results(raw)
-
-    def _process_results(self, raw_data):
-        """Process raw data into final results
-
-        Args:
-            raw_data: Raw data from API response
-
-        Returns:
-            List of processed results
-        """
-        result = [item.get("title", {}) for item in raw_data if isinstance(item, dict)]
-        return [item for item in result if item]
+        return raw
 
 
 class DropsCleaner:

@@ -1,14 +1,14 @@
-"""Terraria Dataset Generator Module"""
-
 import json
 import random
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 import networkx as nx
+from jinja2 import Environment, FileSystemLoader
 
 
 class DatasetGenerator:
-    """Terraria dataset generator"""
+    """泰拉瑞亚数据集生成器核心类"""
 
+    # 玩家游戏进度分级
     PROGRESS_TIERS = {
         0: "Just built first house (Pre-Boss)",
         1: "Defeated Eye of Cthulhu / King Slime",
@@ -21,6 +21,7 @@ class DatasetGenerator:
         8: "Defeated Lunatic Cultist",
     }
 
+    # 实体（Boss）对应的进度层级映射
     ENTITY_TIER_MAP = {
         "Eye of Cthulhu": 1,
         "King Slime": 1,
@@ -37,52 +38,116 @@ class DatasetGenerator:
         "Moon Lord": 8,
     }
 
-    def __init__(self, G: nx.DiGraph):
-        """Initialize dataset generator
-
+    def __init__(self, G: nx.DiGraph, template_dir: str = "template"):
+        """
+        初始化生成器
         Args:
-            G: Terraria knowledge graph
+            G: 包含 Terraria 知识的 DiGraph 实例
+            template_dir: 模板文件存放目录
         """
         self.G = G
         self.items = [n for n in G.nodes() if G.nodes[n].get("node_type") == "Item"]
 
+        self.jinja_env = Environment(
+            loader=FileSystemLoader(template_dir), trim_blocks=True, lstrip_blocks=True
+        )
+
+        # 预加载模板
+        self.system_prompt_template = self.jinja_env.get_template("system_prompt.j2")
+        self.how_to_get_template = self.jinja_env.get_template("how_to_get_output.j2")
+        self.multiturn_template = self.jinja_env.get_template("multiturn_dialogue.j2")
+        self.blind_qa_template = self.jinja_env.get_template("blind_qa_output.j2")
+
     def _get_node_tier(self, node_name: str) -> int:
-        """Heuristic: Infer item tier based on hardmode tag or drop sources.
-
-        Args:
-            node_name: Name of the node to get tier for
-
-        Returns:
-            Tier level of the node
-        """
+        """推断物品的最低进度等级"""
         base_tier = 4 if self.G.nodes[node_name].get("hardmode") else 0
-
         in_edges = self.G.in_edges(node_name, data=True)
         max_tier = base_tier
         for source, _, data in in_edges:
-            if data.get("edge_type") == "DROPS_TO":
+            edge_type = data.get("edge_type")
+            if edge_type == "DROPS_TO":
                 tier = self.ENTITY_TIER_MAP.get(source, 0)
                 max_tier = max(max_tier, tier)
         return max_tier
 
-    def generate_blind_qa(self, target_item: str) -> Optional[Dict]:
-        """Generate a Q&A conversation for 'Blind Queries': User doesn't state progress.
+    def get_qa(self, output_path: str, samples: int = 5000) -> None:
+        """Generate How-To-Get QA dataset and save to file.
+        批量生成并保存 How-To-Get (条件获取) 问答数据集
 
         Args:
-            target_item: Target item to generate QA for
-
-        Returns:
-            Dictionary containing system prompt, instruction, and output, or None if not possible
+            output_path: 保存数据集的文件路径
+            samples: 生成的样本数量上限
         """
+        all_items = self.items[:]
+        random.shuffle(all_items)
+        selected_items = all_items[:samples]
+        dataset = []
+        for item in selected_items:
+            qa = self.generate_how_to_get_qa(item)
+            if qa:
+                dataset.append(qa)
+
+        with open(output_path, "w", encoding="utf-8") as f:
+            for data in dataset:
+                json.dump(data, f, ensure_ascii=False)
+                f.write("\n")
+        print(f"✅ 成功生成并保存 {len(dataset)} 条 How-To-Get 数据至 {output_path}")
+
+    def get_multiturn(self, output_path: str, samples: int = 5000) -> None:
+        """Generate multi-turn dialogue dataset and save to file.
+        批量生成并保存多轮对话数据集
+
+        Args:
+            output_path: 保存数据集的文件路径
+            samples: 生成的样本数量上限
+        """
+        all_items = self.items[:]
+        random.shuffle(all_items)
+        selected_items = all_items[:samples]
+        dataset = []
+        for item in selected_items:
+            dialogue = self.generate_multiturn_dialogue(item)
+            if dialogue:
+                dataset.append(dialogue)
+
+        with open(output_path, "w", encoding="utf-8") as f:
+            for data in dataset:
+                json.dump(data, f, ensure_ascii=False)
+                f.write("\n")
+        print(f"✅ 成功生成并保存 {len(dataset)} 条 多轮对话 数据至 {output_path}")
+
+    def get_blind_qa(self, output_path: str, samples: int = 5000) -> None:
+        """Generate blind QA dataset and save to file.
+        批量生成并保存盲查问答数据集
+
+        Args:
+            output_path: 保存数据集的文件路径
+            samples: 生成的样本数量上限
+        """
+        all_items = self.items[:]
+        random.shuffle(all_items)
+        selected_items = all_items[:samples]
+        dataset = []
+        for item in selected_items:
+            qa = self.generate_blind_qa(item)
+            if qa:
+                dataset.append(qa)
+
+        with open(output_path, "w", encoding="utf-8") as f:
+            for data in dataset:
+                json.dump(data, f, ensure_ascii=False)
+                f.write("\n")
+        print(f"✅ 成功生成并保存 {len(dataset)} 条 盲查问答 数据至 {output_path}")
+
+    def generate_blind_qa(self, target_item: str) -> Optional[Dict]:
+        """生成盲查 QA"""
         if not self.G.has_node(target_item):
             return None
-
         in_edges = list(self.G.in_edges(target_item, data=True))
         if not in_edges:
             return None
 
         item_tier = self._get_node_tier(target_item)
-
         materials = [
             src for src, _, data in in_edges if data.get("edge_type") == "CRAFTS_INTO"
         ]
@@ -100,48 +165,29 @@ class DatasetGenerator:
             f"Where does {target_item} drop?",
         ]
         instruction = random.choice(questions)
-
-        think_steps = [
-            f"Target: Acquire {target_item}",
-            f"Player progress: Unknown (Blind Request)",
-            f"Item minimum progress requirement: Tier {item_tier}",
-            "Strategy: Provide direct acquisition methods, but emphasize the progression threshold to prevent blind grinding.",
-        ]
-
         blocker = [k for k, v in self.ENTITY_TIER_MAP.items() if v == item_tier]
         blocker_name = blocker[0] if blocker else "a higher-tier boss"
 
-        ans = f"Here is how you can obtain the [{target_item}]:\n"
-        if materials:
-            ans += (
-                f"- **Crafting Recipe**: You need to gather {', '.join(materials)}.\n"
-            )
-            ans += f"- **Crafting Station**: Crafted at a {stations[0] if stations else 'by hand'}.\n"
-        elif drops_from:
-            ans += f"- **Drop Source**: Drops from {', '.join(drops_from)}.\n"
+        context = {
+            "target_item": target_item,
+            "item_tier": item_tier,
+            "materials": materials,
+            "stations": stations,
+            "drops_from": drops_from,
+            "blocker_name": blocker_name,
+        }
 
-        if item_tier > 2:
-            ans += f"\n⚠️ **Progression Warning**: This is a later-game item. You need to advance your world progression and at least defeat [{blocker_name}] before you can access these materials or enemies. If you haven't reached this point yet, it's best to focus on your current progression first."
-
-        system_prompt = "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method and make sure to warn the player about the minimum progression threshold for the item."
-        output = f"\n\n{ans}"
-
-        return {"system": system_prompt, "instruction": instruction, "output": output}
+        return {
+            "system": self.system_prompt_template.render(task="blind_qa"),
+            "instruction": instruction,
+            "output": self.blind_qa_template.render(**context),
+        }
 
     def generate_multiturn_dialogue(self, target_item: str) -> Optional[Dict]:
-        """Generate a Multi-turn conversation: AI probes for progress before answering.
-
-        Args:
-            target_item: Target item to generate multi-turn dialogue for
-
-        Returns:
-            Dictionary containing system prompt and message sequence, or None if not possible
-        """
+        """生成多轮对话"""
         if not self.G.has_node(target_item):
             return None
-
         item_tier = self._get_node_tier(target_item)
-
         if item_tier < 3:
             return None
 
@@ -150,49 +196,45 @@ class DatasetGenerator:
             return None
 
         player_tier = random.randint(0, item_tier - 1)
-        player_state_desc = self.PROGRESS_TIERS[player_tier]
         player_boss = [k for k, v in self.ENTITY_TIER_MAP.items() if v == player_tier]
         player_boss_name = player_boss[0] if player_boss else "Wall of Flesh"
-
         blocker = [k for k, v in self.ENTITY_TIER_MAP.items() if v == item_tier]
         blocker_name = blocker[0] if blocker else "a late-game boss"
 
-        user_msg_1 = f"I want to get the {target_item}, how do I do that?"
-
-        ai_think_1 = f"Target: {target_item}. Minimum requirement: Defeat {blocker_name}. Player progress unknown. Probing for core threshold first."
-        ai_msg_1 = f"\n\n{ai_think_1}\n\nThe {target_item} is a very powerful item. To give you the most accurate advice, have you defeated [{blocker_name}] yet? Or what was the last major boss you defeated?"
-
-        user_msg_2 = (
-            f"Haven't beaten them yet, I just recently defeated {player_boss_name}."
-        )
-
-        ai_think_2 = f"Confirmed player is at Tier {player_tier}. Target requires Tier {item_tier}. Player is attempting a progression skip. Intercepting and pointing out the next logical step."
-        ai_msg_2 = f"\n\n{ai_think_2}\n\nSince you've only just defeated {player_boss_name}, you still have quite a long way to go before you can get the {target_item}!\n\nYou cannot obtain it right now because the required materials or drops are progression-locked. Your primary goal right now should be upgrading your gear and preparing to challenge the upcoming bosses (until you defeat {blocker_name}). Only after that can you start gathering the materials for the {target_item}."
-
-        system_prompt = "You are a Terraria Guide. When encountering queries for complex or late-game items, you should proactively ask the player about their progress and provide tailored advice based on their answer to prevent them from attempting impossible progression skips."
+        context = {
+            "target_item": target_item,
+            "item_tier": item_tier,
+            "player_tier": player_tier,
+            "player_boss_name": player_boss_name,
+            "blocker_name": blocker_name,
+        }
 
         return {
-            "system": system_prompt,
+            "system": self.system_prompt_template.render(task="multiturn"),
             "messages": [
-                {"role": "user", "content": user_msg_1},
-                {"role": "assistant", "content": ai_msg_1},
-                {"role": "user", "content": user_msg_2},
-                {"role": "assistant", "content": ai_msg_2},
+                {
+                    "role": "user",
+                    "content": f"I want to get the {target_item}, how do I do that?",
+                },
+                {
+                    "role": "assistant",
+                    "content": self.multiturn_template.render(**context, turn=1),
+                },
+                {
+                    "role": "user",
+                    "content": f"Haven't beaten them yet, I just recently defeated {player_boss_name}.",
+                },
+                {
+                    "role": "assistant",
+                    "content": self.multiturn_template.render(**context, turn=2),
+                },
             ],
         }
 
     def generate_how_to_get_qa(self, target_item: str) -> Optional[Dict]:
-        """Generate a Q&A conversation for 'How to get X'.
-
-        Args:
-            target_item: Target item to generate QA for
-
-        Returns:
-            Dictionary containing system prompt, instruction, and output, or None if not possible
-        """
+        """生成带进度的获取 QA"""
         if not self.G.has_node(target_item):
             return None
-
         in_edges = list(self.G.in_edges(target_item, data=True))
         if not in_edges:
             return None
@@ -201,9 +243,7 @@ class DatasetGenerator:
         player_state_desc = self.PROGRESS_TIERS[player_tier]
         item_tier = self._get_node_tier(target_item)
 
-        materials = []
-        stations = []
-        drops_from = []
+        materials, stations, drops_from = [], [], []
         for src, _, data in in_edges:
             etype = data.get("edge_type")
             if etype == "CRAFTS_INTO":
@@ -213,111 +253,50 @@ class DatasetGenerator:
             elif etype == "DROPS_TO":
                 drops_from.append(src)
 
-        think_steps = [
-            f"Target: Acquire {target_item}",
-            f"Player current progress: Tier {player_tier} ({player_state_desc})",
-            f"Item minimum progress requirement: Tier {item_tier}",
+        blocker = [k for k, v in self.ENTITY_TIER_MAP.items() if v == item_tier]
+        blocker_name = blocker[0] if blocker else "a higher-tier boss"
+
+        context = {
+            "target_item": target_item,
+            "player_tier": player_tier,
+            "player_state_desc": player_state_desc,
+            "item_tier": item_tier,
+            "materials": materials,
+            "stations": stations,
+            "drops_from": drops_from,
+            "blocker_name": blocker_name,
+            "is_hardmode": bool(self.G.nodes[target_item].get("hardmode")),
+        }
+
+        return {
+            "system": self.system_prompt_template.render(task="how_to_get"),
+            "instruction": f"My current progress is: {player_state_desc}. How can I get {target_item}?",
+            "output": self.how_to_get_template.render(**context),
+        }
+
+    def _save_jsonl(self, dataset: List[Dict], path: str):
+        with open(path, "w", encoding="utf-8") as f:
+            for data in dataset:
+                json.dump(data, f, ensure_ascii=False)
+                f.write("\n")
+
+    def save_all_datasets(self, samples_per_type: int = 5000):
+        """生成并保存所有数据集"""
+        all_items = self.items[:]
+        random.shuffle(all_items)
+
+        # QA 数据集
+        qa_data = [
+            self.generate_how_to_get_qa(it) for it in all_items[:samples_per_type]
         ]
+        self._save_jsonl([d for d in qa_data if d], "dataset_how_to_get.jsonl")
 
-        if materials:
-            station_text = (
-                f"Station: {', '.join(stations)}" if stations else "Crafted by hand"
-            )
-            think_steps.append(
-                f"Crafting recipe: Requires {', '.join(materials)}. {station_text}."
-            )
-        if drops_from:
-            think_steps.append(f"Drop source: {', '.join(drops_from)}")
+        # 盲查数据集
+        blind_data = [self.generate_blind_qa(it) for it in all_items[:samples_per_type]]
+        self._save_jsonl([d for d in blind_data if d], "dataset_blind_qa.jsonl")
 
-        if player_tier >= item_tier:
-            think_steps.append(
-                "Judgment: Player progress met. Providing specific instructions."
-            )
-
-            ans = f"With your current progress of [{player_state_desc}], you can definitely obtain the {target_item}. "
-            if materials:
-                ans += f"You can craft it using {', '.join(materials)} "
-                ans += f"at a {stations[0]}." if stations else "by hand."
-            elif drops_from:
-                ans += f"You need to defeat {drops_from[0]} to get it to drop."
-        else:
-            blocker = [k for k, v in self.ENTITY_TIER_MAP.items() if v == item_tier]
-            blocker_name = blocker[0] if blocker else "a higher-tier boss"
-            think_steps.append(
-                f"Judgment: Player attempting to skip progression. Pointing out prerequisites ({blocker_name})."
-            )
-
-            ans = f"Sorry, with your current progress of [{player_state_desc}], you cannot obtain the {target_item} yet. "
-            if self.G.nodes[target_item].get("hardmode") and player_tier < 4:
-                ans += "This is a Hardmode item. You must first go to the Underworld and defeat the [Wall of Flesh] to initiate Hardmode. "
-            else:
-                ans += f"You need to advance your game progression and at least defeat [{blocker_name}] to unlock the required materials or drops."
-
-        cot_text = "\n".join(think_steps)
-        system_prompt = "You are an advanced Terraria game assistant. You must first use the \n tags to perform logical reasoning, checking if the player's current game progress matches the prerequisite conditions for the target item, and then provide your final answer."
-        instruction = (
-            f"My current progress is: {player_state_desc}. How can I get {target_item}?"
-        )
-        output = f"\n\n{cot_text}\n\n{ans}"
-
-        return {"system": system_prompt, "instruction": instruction, "output": output}
-
-    def get_qa(self, output_path: str, samples: int = 5000) -> None:
-        """Generate How-To-Get QA dataset and save to file.
-
-        Args:
-            output_path: Path to save the dataset
-            samples: Number of samples to generate
-        """
-        all_items = self.items
-        random.shuffle(all_items)
-        selected_items = all_items[:samples]
-        dataset = []
-        for item in selected_items:
-            qa = self.generate_how_to_get_qa(item)
-            if qa:
-                dataset.append(qa)
-        with open(output_path, "w", encoding="utf-8") as f:
-            for data in dataset:
-                json.dump(data, f, ensure_ascii=False)
-                f.write("\n")
-
-    def get_multiturn(self, output_path: str, samples: int = 5000) -> None:
-        """Generate multi-turn dialogue dataset and save to file.
-
-        Args:
-            output_path: Path to save the dataset
-            samples: Number of samples to generate
-        """
-        all_items = self.items
-        random.shuffle(all_items)
-        selected_items = all_items[:samples]
-        dataset = []
-        for item in selected_items:
-            dialogue = self.generate_multiturn_dialogue(item)
-            if dialogue:
-                dataset.append(dialogue)
-        with open(output_path, "w", encoding="utf-8") as f:
-            for data in dataset:
-                json.dump(data, f, ensure_ascii=False)
-                f.write("\n")
-
-    def get_blind_qa(self, output_path: str, samples: int = 5000) -> None:
-        """Generate blind QA dataset and save to file.
-
-        Args:
-            output_path: Path to save the dataset
-            samples: Number of samples to generate
-        """
-        all_items = self.items
-        random.shuffle(all_items)
-        selected_items = all_items[:samples]
-        dataset = []
-        for item in selected_items:
-            qa = self.generate_blind_qa(item)
-            if qa:
-                dataset.append(qa)
-        with open(output_path, "w", encoding="utf-8") as f:
-            for data in dataset:
-                json.dump(data, f, ensure_ascii=False)
-                f.write("\n")
+        # 多轮对话
+        multi_data = [
+            self.generate_multiturn_dialogue(it) for it in all_items[:samples_per_type]
+        ]
+        self._save_jsonl([d for d in multi_data if d], "dataset_multiturn.jsonl")

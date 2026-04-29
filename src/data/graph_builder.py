@@ -6,34 +6,6 @@ import networkx as nx
 class GraphBuilder:
     """Terraria Knowledge Graph Builder"""
 
-    PROGRESS_TIERS = {
-        0: "Just built first house (Pre-Boss)",
-        1: "Defeated Eye of Cthulhu / King Slime",
-        2: "Defeated Eater of Worlds / Brain of Cthulhu",
-        3: "Defeated Skeletron",
-        4: "Defeated Wall of Flesh (Entered Hardmode)",
-        5: "Defeated the Mechanical Bosses",
-        6: "Defeated Plantera",
-        7: "Defeated Golem",
-        8: "Defeated Lunatic Cultist",
-    }
-
-    ENTITY_TIER_MAP = {
-        "Eye of Cthulhu": 1,
-        "King Slime": 1,
-        "Eater of Worlds": 2,
-        "Brain of Cthulhu": 2,
-        "Skeletron": 3,
-        "Wall of Flesh": 4,
-        "The Twins": 5,
-        "The Destroyer": 5,
-        "Skeletron Prime": 5,
-        "Plantera": 6,
-        "Golem": 7,
-        "Lunatic Cultist": 8,
-        "Moon Lord": 8,
-    }
-
     def __init__(self):
         pass
 

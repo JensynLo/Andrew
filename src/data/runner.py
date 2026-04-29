@@ -77,19 +77,19 @@ def main():
     parser.add_argument(
         "--samples",
         type=int,
-        default=5000,
+        default=500000,
         help="Number of samples to generate for each dataset type.",
     )
 
     args = parser.parse_args()
 
-    if not os.path.exists(args.config):
-        print(f"Error: Config file {args.config} does not exist")
+    if not os.path.exists(args.cfg):
+        print(f"Error: Config file {args.cfg} does not exist")
         return
 
     print("Loading data files...")
     try:
-        data_dict = load_data_files(args.config)
+        data_dict = load_data_files(args.cfg)
         print(f"Data loading completed, total {len(data_dict)} data types")
     except Exception as e:
         print(f"Error: Problem occurred while loading data: {e}")
