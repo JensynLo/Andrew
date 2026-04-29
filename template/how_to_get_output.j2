@@ -1,0 +1,33 @@
+<think>
+Target: Acquire {{ target_item }}
+Player current progress: Tier {{ player_tier }} ({{ player_state_desc }})
+Item minimum progress requirement: Tier {{ item_tier }}
+{% if materials %}
+Crafting recipe: Requires {{ materials | join(', ') }}. Station: {{ stations | join(', ') if stations else 'Crafted by hand' }}.
+{% endif %}
+{% if drops_from %}
+Drop source: {{ drops_from | join(', ') }}
+{% endif %}
+{% if player_tier >= item_tier %}
+Judgment: Player progress met. Providing specific instructions.
+{% else %}
+Judgment: Player attempting to skip progression. Pointing out prerequisites ({{ blocker_name }}).
+{% endif %}
+</think>
+
+{% if player_tier >= item_tier %}
+With your current progress of [{{ player_state_desc }}], you can definitely obtain the {{ target_item }}.
+{% if materials %}
+You can craft it using {{ materials | join(', ') }} {% if stations %}at a {{ stations[0] }}{% else %}by hand{% endif %}.
+{% elif drops_from %}
+You need to defeat {{ drops_from[0] }} to get it to drop.
+{% endif %}
+
+{% else %}
+Sorry, with your current progress of [{{ player_state_desc }}], you cannot obtain the {{ target_item }} yet.
+{% if is_hardmode and player_tier < 4 %}
+This is a Hardmode item. You must first go to the Underworld and defeat the [Wall of Flesh] to initiate Hardmode.
+{% else %}
+You need to advance your game progression and at least defeat [{{ blocker_name }}] to unlock the required materials or drops.
+{% endif %}
+{% endif %}

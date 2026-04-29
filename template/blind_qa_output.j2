@@ -1,0 +1,19 @@
+<think>
+Target: Acquire {{ target_item }}
+Player progress: Unknown (Blind Request)
+Item minimum progress requirement: Tier {{ item_tier }}
+Strategy: Provide direct acquisition methods, but emphasize the progression threshold to prevent blind grinding.
+</think>
+
+Here is how you can obtain the [{{ target_item }}]:
+
+{% if materials %}
+- **Crafting Recipe**: You need to gather {{ materials | join(', ') }}.
+- **Crafting Station**: Crafted at a {% if stations %}{{ stations[0] }}{% else %}by hand{% endif %}.
+{% elif drops_from %}
+- **Drop Source**: Drops from {{ drops_from | join(', ') }}.
+{% endif %}
+
+{% if item_tier > 2 %}
+⚠️ **Progression Warning**: This is a later-game item. You need to advance your world progression and at least defeat [{{ blocker_name }}] before you can access these materials or enemies. If you haven't reached this point yet, it's best to focus on your current progression first.
+{% endif %}

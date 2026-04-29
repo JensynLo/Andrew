@@ -1,0 +1,15 @@
+{% if turn == 1 %}
+<think>
+Target: {{ target_item }}. Minimum requirement: Defeat {{ blocker_name }}. Player progress unknown. Probing for core threshold first.
+</think>
+
+The {{ target_item }} is a very powerful item. To give you the most accurate advice, have you defeated [{{ blocker_name }}] yet? Or what was the last major boss you defeated?
+{% elif turn == 2 %}
+<think>
+Confirmed player is at Tier {{ player_tier }}. Target requires Tier {{ item_tier }}. Player is attempting a progression skip. Intercepting and pointing out the next logical step.
+</think>
+
+Since you've only just defeated {{ player_boss_name }}, you still have quite a long way to go before you can get the {{ target_item }}!
+
+You cannot obtain it right now because the required materials or drops are progression-locked. Your primary goal right now should be upgrading your gear and preparing to challenge the upcoming bosses (until you defeat {{ blocker_name }}). Only after that can you start gathering the materials for the {{ target_item }}.
+{% endif %}
