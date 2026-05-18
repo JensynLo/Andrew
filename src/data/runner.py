@@ -58,6 +58,33 @@ def ensure_output_directory(output_dir: str):
         os.makedirs(output_dir)
 
 
+def generate_dpo_data(data_config_path: str, output_path: str, max_samples: int = 1000):
+    """
+    Generate DPO training data from existing SFT data using knowledge graph
+    """
+    from .build_dpo_data import build_dpo_dataset
+
+    # Define input files based on the output from SFT generation
+    input_files = []
+    output_dir = os.path.dirname(output_path) or "./output"
+
+    for file_name in os.listdir(output_dir):
+        if file_name.endswith('.jsonl') and 'dpo' not in file_name and file_name in ['blind_qa.jsonl', 'how_to_get_qa.jsonl', 'multiturn_dialogues.jsonl']:
+            input_files.append(os.path.join(output_dir, file_name))
+
+    if not input_files:
+        print("No input files found for DPO generation!")
+        return
+
+    print(f"Found input files: {input_files}")
+
+    print("Starting DPO dataset generation...")
+    dpo_data = build_dpo_dataset(input_files, output_path, max_samples=max_samples, data_config_path=data_config_path)
+
+    print(f"Generated {len(dpo_data)} DPO pairs")
+    return dpo_data
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Build a Terraria knowledge graph from JSON data and generate datasets."
@@ -80,11 +107,28 @@ def main():
         default=500000,
         help="Number of samples to generate for each dataset type.",
     )
+    parser.add_argument(
+        "--generate_dpo",
+        action="store_true",
+        help="Flag to generate DPO data from existing SFT data.",
+    )
+    parser.add_argument(
+        "--dpo_samples",
+        type=int,
+        default=1000,
+        help="Number of DPO samples to generate.",
+    )
 
     args = parser.parse_args()
 
     if not os.path.exists(args.cfg):
         print(f"Error: Config file {args.cfg} does not exist")
+        return
+
+    if args.generate_dpo:
+        # Generate DPO data from existing SFT data
+        dpo_output_path = os.path.join(args.output_dir, "dpo_training_data.jsonl")
+        generate_dpo_data(args.cfg, dpo_output_path, max_samples=args.dpo_samples)
         return
 
     print("Loading data files...")

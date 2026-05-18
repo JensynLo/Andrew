@@ -1,0 +1,147 @@
+[
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method and make sure to warn the player about the minimum progression threshold for the item.",
+    "input": "How do I obtain iron bars in Terraria?",
+    "output": "Iron Bars are crafted by smelting Iron Ore at a Furnace. Iron Ore is commonly found underground in early-game layers. You need to build a Furnace using Stone, Wood, and Torches before smelting. This is an early-game material, so make sure you have started basic mining progression."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method and make sure to warn the player about the minimum progression threshold for the item.",
+    "input": "How do I get a wooden sword in Terraria?",
+    "output": "A Wooden Sword is crafted using Wood collected from trees. It is crafted at a Work Bench. This is a starter weapon, so it should be made at the very beginning of the game before fighting stronger enemies."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method and make sure to warn the player about the minimum progression threshold for the item.",
+    "input": "How do I craft a furnace in Terraria?",
+    "output": "A Furnace is crafted using 20 Stone, 4 Wood, and 3 Torches at a Work Bench. It is an early-game crafting station used to smelt ores into bars. Make sure you have already collected basic underground resources before attempting this."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method and make sure to warn the player about the minimum progression threshold for the item.",
+    "input": "How do I craft an anvil in Terraria?",
+    "output": "An Iron Anvil or Lead Anvil is crafted using 5 Iron Bars or Lead Bars at a Work Bench. It is required for crafting most early weapons and tools. This is an early progression milestone after obtaining basic metal ores."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method and make sure to warn the player about the minimum progression threshold for the item.",
+    "input": "How do I get copper armor in Terraria?",
+    "output": "Copper Armor is crafted from Copper Bars, which are smelted from Copper Ore found underground. It is one of the first armor sets in the game and is suitable only for very early survival."
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should proactively ask the player about their progress and provide tailored advice based on their answer.",
+    "input": "How do I summon Eye of Cthulhu in Terraria?",
+    "output": "The Eye of Cthulhu can be summoned at night using a Suspicious Looking Eye. Before that, are you still in early pre-Hardmode? If so, I can also guide you on how to prepare better gear before fighting it."
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should proactively ask the player about their progress and provide tailored advice based on their answer.",
+    "input": "How do I summon Wall of Flesh in Terraria?",
+    "output": "The Wall of Flesh is summoned by throwing a Guide Voodoo Doll into lava in the Underworld. Have you already explored Hell and prepared strong gear? This is the boss that triggers Hardmode, so preparation is very important."
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should proactively ask the player about their progress and provide tailored advice based on their answer.",
+    "input": "How do I find Plantera in Terraria?",
+    "output": "Plantera appears after breaking a Plantera Bulb in the Underground Jungle, but only after defeating all three Mechanical Bosses. Have you already cleared The Twins, Destroyer, and Skeletron Prime?"
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should proactively ask the player about their progress and provide tailored advice based on their answer.",
+    "input": "Can I get Terra Blade in Terraria?",
+    "output": "The Terra Blade is a late-Hardmode weapon crafted from True Excalibur and True Night's Edge. Since it is mid-to-late Hardmode, have you defeated Plantera yet and unlocked Jungle Temple progression?"
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should proactively ask the player about their progress and provide tailored advice based on their answer.",
+    "input": "How do I craft Zenith in Terraria?",
+    "output": "Zenith is an endgame weapon requiring multiple swords from across the entire game, including Meowmere and Terra Blade. Have you defeated Moon Lord yet? This weapon is only achievable in the final progression stage."
+  },
+  {
+    "instruction": "You are an advanced Terraria game assistant. You must use <think> tags to check progression before answering.",
+    "input": "How do I obtain wings in Terraria?",
+    "output": "<think>Wings require Hardmode progression, usually after defeating early Hardmode bosses or entering mid-game exploration.</think>\n\nWings are obtained in Hardmode through crafting, drops, or events. Early wings like Angel or Demon Wings require Souls from Hardmode enemies. Make sure you have defeated the Wall of Flesh before attempting to obtain them."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method and warn about progression.",
+    "input": "How do I get Chlorophyte in Terraria?",
+    "output": "Chlorophyte Ore is found in the Underground Jungle after entering Hardmode. It spreads slowly in mud blocks. This is mid-Hardmode material, so ensure you have already defeated at least one Mechanical Boss before farming it."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method and warn about progression.",
+    "input": "How do I get Molten Pickaxe in Terraria?",
+    "output": "The Molten Pickaxe is crafted using Hellstone Bars, which require Hellstone and Obsidian. You must explore the Underworld and survive lava hazards. This is a pre-Hardmode end-tier tool."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method and warn about progression.",
+    "input": "How do I get Heart Crystals in Terraria?",
+    "output": "Heart Crystals are found underground and increase maximum health when used. They are common in early exploration caves, especially in the Cavern layer."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method and warn about progression.",
+    "input": "How do I get Mana Stars in Terraria?",
+    "output": "Mana Stars are crafted from Fallen Stars collected at night. You need 5 Fallen Stars to create one Mana Crystal, which increases maximum mana. This is early-game magic progression."
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should ask about progress.",
+    "input": "How do I reforge items in Terraria?",
+    "output": "Reforging is done using the Goblin Tinkerer NPC, who appears after being rescued underground. Have you already found and rescued him? He allows you to improve weapon and accessory modifiers."
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should ask about progress.",
+    "input": "How do I get accessories in Terraria?",
+    "output": "Accessories are obtained from chests, enemy drops, crafting, or NPCs. They become more important in Hardmode for mobility and damage boosts. What stage of the game are you currently in?"
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should ask about progress.",
+    "input": "How do I enter the Dungeon in Terraria?",
+    "output": "The Dungeon is guarded by Skeletron, which must be defeated at night before safely exploring it. Have you already defeated Skeletron?"
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should ask about progress.",
+    "input": "How do I get Queen Bee in Terraria?",
+    "output": "Queen Bee is summoned in the Jungle by breaking Larva or using an Abeemination. Have you explored the Underground Jungle yet?"
+  },
+  {
+    "instruction": "You are an advanced Terraria game assistant. You must use <think> tags to check progression before answering.",
+    "input": "How do I summon Mechanical Bosses in Terraria?",
+    "output": "<think>Mechanical bosses require Hardmode progression and specific crafting materials obtained after Wall of Flesh.</think>\n\nMechanical bosses (The Destroyer, Twins, Skeletron Prime) are summoned using crafted mechanical items at night. You must be in Hardmode and have access to Souls of Night and Light."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method.",
+    "input": "How do I get Crimson Hearts in Terraria?",
+    "output": "Crimson Hearts are found in Crimson worlds underground and can be destroyed to trigger progression events or loot rewards. They are pre-Hardmode exploration objects."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method.",
+    "input": "How do I get Shadow Orbs in Terraria?",
+    "output": "Shadow Orbs are found in Corruption biomes underground. Breaking them provides loot and can trigger boss events. They are pre-Hardmode progression objects."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method.",
+    "input": "How do I get Hellstone Bars in Terraria?",
+    "output": "Hellstone Bars are crafted from Hellstone and Obsidian at a Furnace. Hellstone is found in the Underworld and requires careful lava navigation. This is late pre-Hardmode progression."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method.",
+    "input": "How do I get Obsidian in Terraria?",
+    "output": "Obsidian is created when water meets lava. It is commonly farmed in the Underworld or underground lava pools. This is a basic crafting material for Hellstone gear."
+  },
+  {
+    "instruction": "You are a Terraria game assistant. When a player does not provide their game progress, you must provide the complete acquisition method.",
+    "input": "How do I get Meteorite in Terraria?",
+    "output": "Meteorite appears after destroying a Shadow Orb or Crimson Heart. It spawns in random surface areas and requires careful mining due to burning damage."
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should ask about progress.",
+    "input": "How do I get Minishark in Terraria?",
+    "output": "The Minishark is purchased from the Arms Dealer NPC. Have you already defeated a gun-type boss or obtained a firearm to unlock him?"
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should ask about progress.",
+    "input": "How do I get Star Cannon in Terraria?",
+    "output": "The Star Cannon is crafted using a Minishark and Fallen Stars. Have you progressed enough in early Hardmode or collected enough Fallen Stars at night?"
+  },
+  {
+    "instruction": "You are a Terraria Guide. When encountering queries for complex or late-game items, you should ask about progress.",
+    "input": "How do I get whips in Terraria?",
+    "output": "Whips are Summoner-class weapons obtained through crafting or progression in Hardmode. What stage of progression are you currently in? I can guide you to the best early whip."
+  },
+  {
+    "instruction": "You are an advanced Terraria game assistant. You must use <think> tags to check progression before answering.",
+    "input": "How do I obtain Last Prism in Terraria?",
+    "output": "<think>The Last Prism is a post-Moon Lord weapon requiring endgame progression after defeating Moon Lord.</think>\n\nThe Last Prism is dropped by the Moon Lord in late-game Terraria. You must defeat all major Hardmode bosses and trigger the Lunar Events before you can obtain it. This is one of the strongest magic weapons in the game."
+  }
+]

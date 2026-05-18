@@ -1,0 +1,36 @@
+{
+  "model_comparison": {
+    "base_model_path": "meta-llama/Llama-3.2-3B-Instruct",
+    "sft_model_path": "output/terraria_dpo_model",
+    "eval_data_path": "eval_data.json"
+  },
+  "metrics": {
+    "cross_entropy_loss": {
+      "base_model": 3.4406997170941582,
+      "sft_model": 3.4368310056883713,
+      "improvement": 0.0038687114057869287
+    },
+    "perplexity": {
+      "base_model": 29.648447036743164,
+      "sft_model": 29.533184051513672,
+      "improvement": 0.11526298522949219
+    }
+  },
+  "generation_comparison": {
+    "num_prompts": 10,
+    "base_generated_examples": [
+      " or how do I get more iron\nTo obtain iron bars in Terraria, you will need to mine iron ore and then smelt it into iron bars. Here are the steps to do so:\n1. **Find Iron Ore**: Iron ore can be found in the game's underground layers, typically between 10-20 layers deep. You can find iron ore by digging into the ground or by breaking rocks.\n2. **Mine Iron Ore**: Once you find iron ore, you can mine it by",
+      " or is it not available in Terraria?\nI'm having trouble finding a wooden sword in Terraria, and I can't seem to figure out how to obtain one. I've tried searching for it in the Dungeon, but I haven't found one yet. Is it even available in Terraria?\n\n**Update**: I've checked the Terraria Wiki and it says that a wooden sword is not available in Terraria. I was mistaken in my previous assumption.\n\nYou are correct, there is no wooden sword in Terraria. I",
+      " or How do I craft a furnace in Terraria 2?\nCrafting a furnace in Terraria involves gathering materials and using a crafting table. Here's a step-by-step guide to crafting a furnace in Terraria and Terraria 2.\n\n### Crafting a Furnace in Terraria\n\n1.  **Gather Materials:** To craft a furnace, you'll need 10 Iron Bars. You can obtain iron bars by mining iron ore, which can be found in the underground layers of the game world.\n2. "
+    ],
+    "sft_generated_examples": [
+      " or is it not available?\nIron bars are indeed available in Terraria, and they can be obtained through various means. Here's how:\n\n1. Mining Iron Ore: You can mine iron ore by digging deep into the world, and the ore will drop when you hit it with your pickaxe. You can then smelt the ore in a furnace to produce iron bars.\n2. Crafting: You can also craft iron bars by smelting iron ingots in a furnace. To do this, you",
+      " or how do I craft a wooden sword?\nTo craft a wooden sword in Terraria, you will need the following materials:\n- 1 Wooden Stick\n- 1 Wood\nYou can find wooden sticks in the game by breaking down wooden logs. You can also purchase them from the vendor in the town of Hallow. To obtain wood, you can chop down trees, which are found in the game's forest biome.\n\nHere is a step-by-step guide on how to craft a wooden sword:\n\n1",
+      " or how to make a furnace in Terraria\nTo craft a furnace in Terraria, you will need the following materials:\nFurnace\n- 1 Iron Bar\n- 1 Copper Bar\n- 1 Gold Bar\n\nHere's how you can craft a furnace in Terraria:\n1. Open your Crafting Menu by pressing the \"C\" key on your keyboard.\n2. In the Crafting Menu, you will see a 3x3 grid of squares.\n3. Place the Iron Bar, Copper"
+    ]
+  },
+  "summary": {
+    "loss_improvement_percentage": 0.11243966994754914,
+    "perplexity_improvement_percentage": 0.3887656749328131
+  }
+}
