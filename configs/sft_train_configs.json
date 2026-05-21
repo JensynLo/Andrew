@@ -1,0 +1,60 @@
+{
+"wandb_project": "Andrew-SFT",
+  "model": {
+    "model_id": "meta-llama/Llama-3.2-3B-Instruct",
+    "torch_dtype": "bfloat16"
+  },
+
+  "training": {
+    "output_dir_base": "./output/SFT",
+    "max_seq_length": 2048,
+    "wiki_data_ratio": 1.0,
+    "gradient_checkpointing": true,
+    "peft_config": {
+      "r": 16,
+      "lora_alpha": 32,
+      "target_modules": [
+        "q_proj",
+        "k_proj",
+        "v_proj",
+        "o_proj",
+        "gate_proj",
+        "up_proj",
+        "down_proj"
+      ],
+      "lora_dropout": 0.05,
+      "bias": "none",
+      "task_type": "CAUSAL_LM"
+    },
+  "sft_config": {
+      "per_device_train_batch_size": 1,
+      "gradient_accumulation_steps": 16,
+      "gradient_checkpointing_kwargs": {
+        "use_reentrant": false
+      },
+      "optim": "adamw_torch",
+      "learning_rate": 0.0002,
+      "fp16": false,
+      "bf16": true,
+      "max_grad_norm": 0.3,
+      "max_length": 2048,           
+      "dataset_text_field": "text",
+      "num_train_epochs": 3,
+      "warmup_steps": 10,
+      "lr_scheduler_type": "cosine",
+      "logging_steps": 10,              
+      "eval_strategy": "steps",          
+      "eval_steps": 50,                  
+      "save_strategy": "steps",         
+      "save_steps": 50,                  
+      "report_to": "wandb"
+    }
+  },
+  "data": {
+    "custom_data_files": [
+      "output/how_to_get_qa.jsonl",
+      "output/blind_qa.jsonl",
+      "output/multiturn_dialogues.jsonl"
+    ]
+  }
+}
