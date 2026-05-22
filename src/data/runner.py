@@ -62,14 +62,20 @@ def generate_dpo_data(data_config_path: str, output_path: str, max_samples: int 
     """
     Generate DPO training data from existing SFT data using knowledge graph
     """
-    from .build_dpo_data import build_dpo_dataset
+    from ..dpo.data_generator import DPODataGenerator
+    from .graph_builder import GraphBuilder
 
     # Define input files based on the output from SFT generation
     input_files = []
     output_dir = os.path.dirname(output_path) or "./output"
 
     for file_name in os.listdir(output_dir):
-        if file_name.endswith('.jsonl') and 'dpo' not in file_name and file_name in ['blind_qa.jsonl', 'how_to_get_qa.jsonl', 'multiturn_dialogues.jsonl']:
+        if (
+            file_name.endswith(".jsonl")
+            and "dpo" not in file_name
+            and file_name
+            in ["blind_qa.jsonl", "how_to_get_qa.jsonl", "multiturn_dialogues.jsonl"]
+        ):
             input_files.append(os.path.join(output_dir, file_name))
 
     if not input_files:
@@ -78,11 +84,17 @@ def generate_dpo_data(data_config_path: str, output_path: str, max_samples: int 
 
     print(f"Found input files: {input_files}")
 
-    print("Starting DPO dataset generation...")
-    dpo_data = build_dpo_dataset(input_files, output_path, max_samples=max_samples, data_config_path=data_config_path)
+    # Build graph for the generator
+    print("Loading data for graph...")
+    data_dict = load_data_files(data_config_path)
+    builder = GraphBuilder()
+    G = builder.build_graph(data_dict)
 
-    print(f"Generated {len(dpo_data)} DPO pairs")
-    return dpo_data
+    print("Starting DPO dataset generation...")
+    generator = DPODataGenerator(G=G)
+    generator.create_dataset(input_files, output_path, max_samples=max_samples)
+
+    return True
 
 
 def main():
